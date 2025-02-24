@@ -36,10 +36,10 @@ resource "aws_api_gateway_integration" "post_integration" {
 }
 
 
-resource "aws_iam_role_policy_attachment" "lambda_basic" {
-  policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
-  role = aws_iam_role.lambda_apigateway_role.name
-}
+# resource "aws_iam_role_policy_attachment" "lambda_basic" {
+#   policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+#   role = aws_iam_role.lambda_apigateway_role.name
+# }
 
 
 resource "aws_lambda_permission" "apigw_lambda" {
@@ -47,7 +47,7 @@ resource "aws_lambda_permission" "apigw_lambda" {
   action                   = "lambda:InvokeFunction" 
   function_name            = aws_lambda_function.lambda_https.function_name
   principal                = "apigateway.amazonaws.com"
-  source_arn               = "arn:aws:execute-api:${var.region}:${var.accountId}:${aws_api_gateway_rest_api.dynamodb_operations_api.id}/*/${aws_api_gateway_method.post_method.http_method}${aws_api_gateway_resource.dynamodb_manager_resource.path}"
+  source_arn               = "${aws_api_gateway_rest_api.dynamodb_operations_api.execution_arn}/*/*/*"
 }
 
 
@@ -65,7 +65,7 @@ resource "aws_api_gateway_deployment" "dynamodb_operations_deployment" {
 
 # Output the API Gateway URL
 output "api_gateway_url" {
-  value = "https://${aws_api_gateway_rest_api.dynamodb_operations_api.id}.execute-api.${var.region}.amazonaws.com/prod/DynamoDBManager"
+ value = aws_api_gateway_deployment.dynamodb_operations_deployment.invoke_url
 }
 
 
